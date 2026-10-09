@@ -1,0 +1,42 @@
+// DAX measures for the e-commerce model.
+// Create them in a dedicated table: Home > Enter data > name it "_Measures", then
+// right-click the table > New measure and paste each one.
+// Revenue and order counts only include orders whose status is "Completed".
+
+Total Revenue =
+CALCULATE (
+    SUM ( fact_orders[revenue] ),
+    fact_orders[order_status] = "Completed"
+)
+
+Total Orders =
+CALCULATE (
+    DISTINCTCOUNT ( fact_orders[order_id] ),
+    fact_orders[order_status] = "Completed"
+)
+
+Average Order Value =
+DIVIDE ( [Total Revenue], [Total Orders] )
+
+// Revenue of the latest month in the current filter context.
+// On a chart with dim_date[year_month] on the axis each point is its own month;
+// in a card with no date filter it shows the most recent month in the data.
+Monthly Revenue =
+CALCULATE (
+    [Total Revenue],
+    dim_date[year_month] = MAX ( dim_date[year_month] )
+)
+
+// ---- Optional extras --------------------------------------------------
+
+Units Sold =
+CALCULATE (
+    SUM ( fact_orders[quantity] ),
+    fact_orders[order_status] = "Completed"
+)
+
+Order Completion Rate =
+DIVIDE (
+    CALCULATE ( DISTINCTCOUNT ( fact_orders[order_id] ), fact_orders[order_status] = "Completed" ),
+    DISTINCTCOUNT ( fact_orders[order_id] )
+)
